@@ -20,6 +20,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
+    "noEmitOnError": false,
     "declaration": true,
     "typeRoots": ["./dist/index.d.ts"]
   },
