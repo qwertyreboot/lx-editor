@@ -18,7 +18,6 @@ import ActionsPlugin from "./plugins/ActionsPlugin";
 import AutoEmbedPlugin from "./plugins/AutoEmbedPlugin";
 import AutoLinkPlugin from "./plugins/AutoLinkPlugin";
 import CollapsiblePlugin from "./plugins/CollapsiblePlugin";
-import CommentPlugin from "./plugins/CommentPlugin";
 import ComponentPickerPlugin from "./plugins/ComponentPickerPlugin";
 import DragDropPaste from "./plugins/DragDropPastePlugin";
 import DraggableBlockPlugin from "./plugins/DraggableBlockPlugin";
@@ -50,8 +49,14 @@ import YouTubePlugin from "./plugins/YouTubePlugin";
 import ContentEditable from "./ui/ContentEditable";
 import Placeholder from "./ui/Placeholder";
 import AutocompletePlugin from "./plugins/AutocompletePlugin";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
-export default function Editor(): JSX.Element {
+interface IPluginProps {
+  onSave?: (json: string) => void;
+  debug?: boolean;
+}
+
+export default function Plugins({ onSave, debug }: IPluginProps): JSX.Element {
   const { historyState } = useSharedHistoryContext();
   const isEditable = useLexicalEditable();
   const placeholder = <Placeholder>{"Enter some rich text..."}</Placeholder>;
@@ -60,6 +65,7 @@ export default function Editor(): JSX.Element {
   const [isSmallWidthViewport, setIsSmallWidthViewport] =
     useState<boolean>(false);
   const [isLinkEditMode, setIsLinkEditMode] = useState<boolean>(false);
+  const [editor] = useLexicalComposerContext();
 
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
     if (_floatingAnchorElem !== null) {
@@ -85,10 +91,16 @@ export default function Editor(): JSX.Element {
     };
   }, [isSmallWidthViewport]);
 
+  console.log("isEditable", isEditable);
+
   return (
     <>
-      <ToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} />
-      <div className={"editor-container tree-view"}>
+      {isEditable && <ToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} />}
+      <div
+        className={`editor-container ${debug ? "tree-view" : ""} ${
+          !isEditable ? "view-only" : ""
+        }`}
+      >
         <DragDropPaste />
         <AutoFocusPlugin />
         <ClearEditorPlugin />
@@ -102,7 +114,7 @@ export default function Editor(): JSX.Element {
         <KeywordsPlugin />
         <SpeechToTextPlugin />
         <AutoLinkPlugin />
-        <CommentPlugin />
+        <MarkdownShortcutPlugin />
 
         <HistoryPlugin externalHistoryState={historyState} />
 
@@ -117,7 +129,6 @@ export default function Editor(): JSX.Element {
           placeholder={placeholder}
           ErrorBoundary={LexicalErrorBoundary}
         />
-        <MarkdownShortcutPlugin />
         <ListPlugin />
         <CheckListPlugin />
         <ListMaxIndentLevelPlugin maxDepth={7} />
@@ -139,7 +150,7 @@ export default function Editor(): JSX.Element {
         <CollapsiblePlugin />
         <PageBreakPlugin />
         <LayoutPlugin />
-        {floatingAnchorElem && !isSmallWidthViewport && (
+        {isEditable && floatingAnchorElem && !isSmallWidthViewport && (
           <>
             <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
             <FloatingLinkEditorPlugin
@@ -158,9 +169,18 @@ export default function Editor(): JSX.Element {
           </>
         )}
         <AutocompletePlugin />
-        <ActionsPlugin />
+        <button
+          onClick={() => {
+            const json = editor.getEditorState().toJSON();
+            console.log("json", JSON.stringify(json));
+            onSave?.(JSON.stringify(json));
+          }}
+        >
+          Save
+        </button>
+        {isEditable && <ActionsPlugin />}
       </div>
-      <TreeViewPlugin />
+      {debug && <TreeViewPlugin />}
     </>
   );
 }
