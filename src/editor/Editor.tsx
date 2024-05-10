@@ -8,16 +8,21 @@ import PlaygroundEditorTheme from "./themes/PlaygroundEditorTheme";
 import PlaygroundNodes from "./nodes/PlaygroundNodes";
 
 import "./styles.css";
+import { AdditionalAction } from "./plugins/ActionsPlugin";
+import { EditorState } from "lexical";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 
 export interface IEditorProps {
-  onSave?: (json: string) => void;
+  actions?: AdditionalAction[];
+  onChange?: (json: string, editorState: EditorState) => void;
   debug?: boolean;
   mode?: "edit" | "view";
   content?: string;
 }
 
 export default function Editor({
-  onSave,
+  actions,
+  onChange,
   mode = "edit",
   content,
   debug = false,
@@ -43,7 +48,13 @@ export default function Editor({
         <TableContext>
           <SharedAutocompleteContext>
             <div className="editor-shell">
-              <Plugins onSave={onSave} debug={debug} />
+              <Plugins actions={actions} debug={debug} />
+              <OnChangePlugin
+                onChange={(editorState) => {
+                  const json = editorState.toJSON();
+                  onChange?.(JSON.stringify(json), editorState);
+                }}
+              />
             </div>
           </SharedAutocompleteContext>
         </TableContext>

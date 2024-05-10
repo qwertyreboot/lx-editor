@@ -14,7 +14,7 @@ import useLexicalEditable from "@lexical/react/useLexicalEditable";
 import { useEffect, useState } from "react";
 
 import { useSharedHistoryContext } from "./context/SharedHistoryContext";
-import ActionsPlugin from "./plugins/ActionsPlugin";
+import ActionsPlugin, { AdditionalAction } from "./plugins/ActionsPlugin";
 import AutoEmbedPlugin from "./plugins/AutoEmbedPlugin";
 import AutoLinkPlugin from "./plugins/AutoLinkPlugin";
 import CollapsiblePlugin from "./plugins/CollapsiblePlugin";
@@ -49,14 +49,16 @@ import YouTubePlugin from "./plugins/YouTubePlugin";
 import ContentEditable from "./ui/ContentEditable";
 import Placeholder from "./ui/Placeholder";
 import AutocompletePlugin from "./plugins/AutocompletePlugin";
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
-interface IPluginProps {
-  onSave?: (json: string) => void;
+interface IPluginsProps {
+  actions?: AdditionalAction[];
   debug?: boolean;
 }
 
-export default function Plugins({ onSave, debug }: IPluginProps): JSX.Element {
+export default function Plugins({
+  actions,
+  debug,
+}: IPluginsProps): JSX.Element {
   const { historyState } = useSharedHistoryContext();
   const isEditable = useLexicalEditable();
   const placeholder = <Placeholder>{"Enter some rich text..."}</Placeholder>;
@@ -65,7 +67,6 @@ export default function Plugins({ onSave, debug }: IPluginProps): JSX.Element {
   const [isSmallWidthViewport, setIsSmallWidthViewport] =
     useState<boolean>(false);
   const [isLinkEditMode, setIsLinkEditMode] = useState<boolean>(false);
-  const [editor] = useLexicalComposerContext();
 
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
     if (_floatingAnchorElem !== null) {
@@ -169,16 +170,7 @@ export default function Plugins({ onSave, debug }: IPluginProps): JSX.Element {
           </>
         )}
         <AutocompletePlugin />
-        <button
-          onClick={() => {
-            const json = editor.getEditorState().toJSON();
-            console.log("json", JSON.stringify(json));
-            onSave?.(JSON.stringify(json));
-          }}
-        >
-          Save
-        </button>
-        {isEditable && <ActionsPlugin />}
+        <ActionsPlugin additionalActions={actions} />
       </div>
       {debug && <TreeViewPlugin />}
     </>

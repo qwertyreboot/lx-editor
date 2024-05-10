@@ -218,7 +218,23 @@ const jsonContent = {
 export default function App() {
   return (
     <div>
-      <Editor mode="edit" content={JSON.stringify(jsonContent)} />
+      <Editor
+        mode="edit"
+        key={6}
+        content={JSON.stringify(jsonContent)}
+        onChange={(content, editorState) => {
+          console.log(content, editorState);
+        }}
+        actions={[
+          {
+            icon: "bold",
+            label: "Bold",
+            onClick: () => {
+              console.log("Bold");
+            },
+          },
+        ]}
+      />
     </div>
   );
 }
