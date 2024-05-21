@@ -81,12 +81,7 @@ import { sanitizeUrl } from "../../utils/url";
 import { EmbedConfigs } from "../AutoEmbedPlugin";
 import { INSERT_COLLAPSIBLE_COMMAND } from "../CollapsiblePlugin";
 import { InsertEquationDialog } from "../EquationsPlugin";
-import { INSERT_EXCALIDRAW_COMMAND } from "../ExcalidrawPlugin";
-import {
-  INSERT_IMAGE_COMMAND,
-  InsertImageDialog,
-  InsertImagePayload,
-} from "../ImagesPlugin";
+import { InsertImageDialog } from "../ImagesPlugin";
 import { InsertInlineImageDialog } from "../InlineImagePlugin";
 import InsertLayoutDialog from "../LayoutPlugin/InsertLayoutDialog";
 import { INSERT_PAGE_BREAK } from "../PageBreakPlugin";
@@ -203,7 +198,6 @@ function dropDownActiveClass(active: boolean) {
 function BlockFormatDropDown({
   editor,
   blockType,
-  rootType,
   disabled = false,
 }: {
   blockType: keyof typeof blockTypeToBlockName;
@@ -850,9 +844,6 @@ export default function ToolbarPlugin({
     },
     [activeEditor, selectedElementKey]
   );
-  const insertGifOnClick = (payload: InsertImagePayload) => {
-    activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
-  };
 
   return (
     <div className="toolbar">
@@ -1122,18 +1113,6 @@ export default function ToolbarPlugin({
             >
               <i className="icon image" />
               <span className="text">Inline Image</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
-                activeEditor.dispatchCommand(
-                  INSERT_EXCALIDRAW_COMMAND,
-                  undefined
-                );
-              }}
-              className="item"
-            >
-              <i className="icon diagram-2" />
-              <span className="text">Excalidraw</span>
             </DropDownItem>
             <DropDownItem
               onClick={() => {
